@@ -65,6 +65,13 @@
      * future requests.
      */
     DigestAjax.AUTH_USERNAME = null;
+    /**
+     * Value of the WWW-Authenticate header name to retrieve. This can be 
+     * changed if the server is returning authentication information on a 
+     * different header name value. This is commonly the case when avoiding 
+     * built-in browser authentication prompts.
+     */
+    DigestAjax.WWW_AUTHENTICATE = 'WWW-Authenticate';
     ////////////////////////////////////////////////////////////////////////////
     //      Primary AJAX Digest Authentication Function
     ////////////////////////////////////////////////////////////////////////////
@@ -112,15 +119,13 @@
             type: 'GET'
         }, s);
 
-        doAjaxUnauthorized();
-
         var dfd = $.Deferred();
-        return dfd.promise();
+        return dfd.promise(doAjaxUnauthorized());
 
         function doAjaxUnauthorized() {
             //If the request is successful, invoke callbacks immediately 
             //without using Digest authentication
-            $.ajax(s)
+            return $.ajax(s)
                 .done(function(data, textStatus, jqXHR) {
                     dfd.resolve(data, textStatus, jqXHR);
                 })
@@ -162,7 +167,7 @@
         }
 
         function createAuthorizationHeader(xhr) {
-            var header = xhr.getResponseHeader('WWW-Authenticate');
+            var header = xhr.getResponseHeader(DigestAjax.WWW_AUTHENTICATE);
             if (header !== undefined && header !== null) {
                 var params = parseWWWAuthenticateHeader(header);
 
